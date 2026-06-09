@@ -11,13 +11,22 @@
 const OpenAI = require('openai');
 
 // -----------------------------------------------
-// Initialize the OpenAI client.
-// The API key is automatically read from the
-// OPENAI_API_KEY environment variable.
-// -----------------------------------------------
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Helper to get or initialize OpenAI client safely.
+// This prevents the server from crashing on boot if the key is missing.
+let openai = null;
+function getOpenAIClient() {
+  if (openai) return openai;
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey.trim() === '' || apiKey === 'your_openai_api_key_here') {
+    throw new Error('API_KEY_MISSING');
+  }
+
+  openai = new OpenAI({
+    apiKey: apiKey,
+  });
+  return openai;
+}
 
 // -----------------------------------------------
 // System Prompt
@@ -66,8 +75,23 @@ const handleChat = async (req, res) => {
     // 3. Log the incoming query (useful for debugging)
     console.log(`[GovBuddy] User: "${userMessage}"`);
 
-    // 4. Call the OpenAI Chat Completions API
-    const completion = await openai.chat.completions.create({
+    // 4. Initialize OpenAI client safely
+    let openaiClient;
+    try {
+      openaiClient = getOpenAIClient();
+    } catch (e) {
+      if (e.message === 'API_KEY_MISSING') {
+        console.error('[GovBuddy] OpenAI Error: API key is missing or empty in .env');
+        return res.status(500).json({
+          error: 'Configuration Error',
+          details: 'OpenAI API key is missing or empty. Please add your OPENAI_API_KEY to backend/.env',
+        });
+      }
+      throw e;
+    }
+
+    // 5. Call the OpenAI Chat Completions API
+    const completion = await openaiClient.chat.completions.create({
       model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
       messages: [
         // System message sets the AI's role and behaviour
