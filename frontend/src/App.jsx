@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import ChatbotPage from './Chatbot';
 
 /* ============================================
    NAVBAR COMPONENT
    ============================================ */
-function Navbar() {
+function Navbar({ onOpenChat }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -57,10 +58,10 @@ function Navbar() {
 
         {/* Desktop CTA */}
         <div className="navbar-cta">
-          <a href="#features" className="btn-primary" id="nav-cta-btn">
+          <button className="btn-primary" id="nav-cta-btn" onClick={onOpenChat}>
             Get Started
             <span aria-hidden="true">→</span>
-          </a>
+          </button>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -90,9 +91,9 @@ function Navbar() {
             {link.label}
           </a>
         ))}
-        <a href="#features" className="btn-primary" onClick={() => setMenuOpen(false)}>
+        <button className="btn-primary" onClick={() => { setMenuOpen(false); onOpenChat(); }}>
           Get Started →
-        </a>
+        </button>
       </div>
     </nav>
   );
@@ -101,7 +102,7 @@ function Navbar() {
 /* ============================================
    HERO SECTION COMPONENT
    ============================================ */
-function HeroSection() {
+function HeroSection({ onOpenChat }) {
   return (
     <section id="home" className="hero" aria-labelledby="hero-heading">
       {/* Animated Background */}
@@ -133,9 +134,9 @@ function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="hero-buttons">
-          <a href="#features" className="btn-primary" id="hero-cta-primary">
-            🚀 Explore Features
-          </a>
+          <button className="btn-primary" id="hero-cta-primary" onClick={onOpenChat}>
+            🚀 Try GovBuddy AI
+          </button>
           <a href="#about" className="btn-secondary" id="hero-cta-secondary">
             Learn More →
           </a>
@@ -528,13 +529,26 @@ function Footer() {
 
 /* ============================================
    ROOT APP COMPONENT
+   Manages page routing: 'landing' | 'chat'
    ============================================ */
 function App() {
+  // 'landing' shows the marketing page, 'chat' shows the chatbot
+  const [page, setPage] = useState('landing');
+
+  const openChat   = () => setPage('chat');
+  const goHome     = () => setPage('landing');
+
+  // Show the Chatbot page
+  if (page === 'chat') {
+    return <ChatbotPage onGoHome={goHome} />;
+  }
+
+  // Show the Landing page (default)
   return (
     <>
-      <Navbar />
+      <Navbar onOpenChat={openChat} />
       <main id="main-content">
-        <HeroSection />
+        <HeroSection onOpenChat={openChat} />
         <FeaturesSection />
         <AboutSection />
       </main>
