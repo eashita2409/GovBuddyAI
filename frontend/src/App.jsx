@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import ChatbotPage from './Chatbot';
+import Chatbot from './Chatbot';
 
 /* ============================================
    NAVBAR COMPONENT
@@ -529,26 +529,23 @@ function Footer() {
 
 /* ============================================
    ROOT APP COMPONENT
-   Manages page routing: 'landing' | 'chat'
+   Manages page routing: 'home' | 'chat'
    ============================================ */
 function App() {
-  // 'landing' shows the marketing page, 'chat' shows the chatbot
-  const [page, setPage] = useState('landing');
-
-  const openChat   = () => setPage('chat');
-  const goHome     = () => setPage('landing');
+  // 'home' shows the marketing page, 'chat' shows the chatbot
+  const [page, setPage] = useState('home');
 
   // Show the Chatbot page
   if (page === 'chat') {
-    return <ChatbotPage onGoHome={goHome} />;
+    return <Chatbot onGoHome={() => setPage('home')} />;
   }
 
   // Show the Landing page (default)
   return (
     <>
-      <Navbar onOpenChat={openChat} />
+      <Navbar onOpenChat={() => setPage('chat')} />
       <main id="main-content">
-        <HeroSection onOpenChat={openChat} />
+        <HeroSection onOpenChat={() => setPage('chat')} />
         <FeaturesSection />
         <AboutSection />
       </main>
